@@ -2,7 +2,7 @@
   "name": "Ajisite",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "KennethJT",
+  "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
