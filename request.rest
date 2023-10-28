@@ -3,9 +3,42 @@ POST http://localhost:3009/api/user/register HTTP/1.1
 content-type: application/json
 
 {
-    "firstname": "House",
-    "lastname": "sample",
-    "email": "sample@example.com",
-    "mobile": "09087876545",
+    "firstname": "Cat",
+    "lastname": "DOG",
+    "email": "cat@example.com",
+    "mobile": "090878080909",
     "password": "password"
+}
+
+
+### login user
+POST http://localhost:3009/api/user/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "sample@example.com",
+    "password": "password"
+}
+
+### all users
+GET http://localhost:3009/api/user/all-users HTTP/1.1
+content-type: application/json
+
+### single user
+GET http://localhost:3009/api/user/653d314e6f75b2cb57812b30 HTTP/1.1
+content-type: application/json
+
+### delete user
+DELETE http://localhost:3009/api/user/ HTTP/1.1
+content-type: application/json
+
+### update user
+PATCH http://localhost:3009/api/user/653d366577d878b137fa39f3 HTTP/1.1
+content-type: application/json
+
+{
+    "firstname": "Shade",
+    "lastname": "Lola",
+    # "email": "shade@example.com",
+    "mobile": "090878080909"
 }

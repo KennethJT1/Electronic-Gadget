@@ -8,6 +8,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   mobile: string;
+  role: string;
+  isPasswordMatched: (enteredPassword: string) => Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>({
@@ -36,6 +38,11 @@ const userSchema = new Schema<IUser>({
   password: {
     type: String,
     required: true,
+    select: false,
+  },
+  role: {
+    type: String,
+    default: "user",
   },
 });
 
@@ -48,7 +55,13 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.isPasswordMatched = async function (enteredPassword:any) {
+userSchema.methods.isPasswordMatched = async function (enteredPassword: any) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+userSchema.methods.isPasswordMatched = async function (
+  enteredPassword: string
+) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
