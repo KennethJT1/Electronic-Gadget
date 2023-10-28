@@ -6,6 +6,7 @@ import cors from "cors";
 
 import { dbConnect } from "./config/dbConnect";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
+import User from "./routes/user";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+app.use("/api/user", User);
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
