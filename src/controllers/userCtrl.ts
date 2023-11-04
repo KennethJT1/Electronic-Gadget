@@ -4,6 +4,7 @@ import asyncHandler from "express-async-handler";
 import { User } from "../models/userModel";
 import { generateToken } from "../config/jwtToken";
 import { generateRefreshToken } from "../config/refreshtoken";
+import { JwtPayload } from "jsonwebtoken";
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -107,14 +108,13 @@ export const deleteUser = asyncHandler(async (req:Request, res:Response) => {
   }
 });
 
-export const updatedUser = asyncHandler(async (req:Request, res:Response) => {
-  // const { _id } = req.user;
-  const { _id } = req.params;
+export const updatedUser = asyncHandler(async (req:JwtPayload, res:Response) => {
+  const { id } = req.user;
   // validateMongoDbId(_id);
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
-      _id,
+      id,
       {
         firstname: req?.body?.firstname,
         lastname: req?.body?.lastname,

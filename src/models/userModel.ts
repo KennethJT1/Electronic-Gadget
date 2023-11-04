@@ -9,6 +9,11 @@ export interface IUser extends Document {
   password: string;
   mobile: string;
   role: string;
+  isBlocked: boolean;
+  cart: any;
+  address: string;
+  wishlist: [{}];
+
   isPasswordMatched: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -44,6 +49,18 @@ const userSchema = new Schema<IUser>({
     type: String,
     default: "user",
   },
+  isBlocked: {
+    type: Boolean,
+    default: false,
+  },
+  cart: {
+    type: Array,
+    default: [],
+  },
+  address: {
+    type: String,
+  },
+  wishlist: [{ type: Schema.Types.ObjectId, ref: "Product" }],
 });
 
 userSchema.pre("save", async function (next) {
