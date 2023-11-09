@@ -2,6 +2,10 @@ import { model, Schema, Types, Document, Model } from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
+
+//!mdbgu
+
+
 export interface IUser extends Document {
   firstname: string;
   lastname: string;
@@ -13,55 +17,66 @@ export interface IUser extends Document {
   cart: any;
   address: string;
   wishlist: [{}];
+  passwordChangedAt: Date;
+  passwordResetToken: String;
+  passwordResetExpires: Date;
 
   isPasswordMatched: (enteredPassword: string) => Promise<boolean>;
 }
 
-const userSchema = new Schema<IUser>({
-  firstname: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true,
+const userSchema = new Schema<IUser>(
+  {
+    firstname: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    lastname: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    mobile: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
+    role: {
+      type: String,
+      default: "user",
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+    cart: {
+      type: Array,
+      default: [],
+    },
+    address: {
+      type: String,
+    },
+    wishlist: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
-  lastname: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  mobile: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    select: false,
-  },
-  role: {
-    type: String,
-    default: "user",
-  },
-  isBlocked: {
-    type: Boolean,
-    default: false,
-  },
-  cart: {
-    type: Array,
-    default: [],
-  },
-  address: {
-    type: String,
-  },
-  wishlist: [{ type: Schema.Types.ObjectId, ref: "Product" }],
-});
+  {
+    timestamps: true,
+  }
+);
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {

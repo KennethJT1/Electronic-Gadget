@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import { User } from "../models/userModel";
 import { generateToken } from "../config/jwtToken";
 import { generateRefreshToken } from "../config/refreshtoken";
-import { JwtPayload } from "jsonwebtoken";
+import { validateMongoDbId } from "../utils/validateMongodbId";
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -84,7 +85,7 @@ export const getallUser = asyncHandler(async (req: Request, res: Response) => {
 
 export const getUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // validateMongoDbId(id);
+  validateMongoDbId(id);
 
   try {
     const getaUser = await User.findById(id);
@@ -96,39 +97,102 @@ export const getUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export const deleteUser = asyncHandler(async (req:Request, res:Response) => {
+export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // validateMongoDbId(id);
+  validateMongoDbId(id);
 
   try {
-     await User.findByIdAndDelete(id);
-    res.status(204).json("User deleted successfully"); 
-  } catch (error:any) {
+    await User.findByIdAndDelete(id);
+    res.status(204).json("User deleted successfully");
+  } catch (error: any) {
     throw new Error(error.message);
   }
 });
 
-export const updatedUser = asyncHandler(async (req:JwtPayload, res:Response) => {
-  const { id } = req.user;
-  // validateMongoDbId(_id);
+export const updatedUser = asyncHandler(
+  async (req: JwtPayload, res: Response) => {
+    const { id } = req.user;
+    validateMongoDbId(id);
 
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        {
+          firstname: req?.body?.firstname,
+          lastname: req?.body?.lastname,
+          email: req?.body?.email,
+          mobile: req?.body?.mobile,
+        },
+        {
+          new: true,
+        }
+      );
+      res.status(201).json(updatedUser);
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+);
+
+export const blockUser = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  validateMongoDbId(id);
   try {
-    const updatedUser = await User.findByIdAndUpdate(
+    const blockusr = await User.findByIdAndUpdate(
       id,
       {
-        firstname: req?.body?.firstname,
-        lastname: req?.body?.lastname,
-        email: req?.body?.email,
-        mobile: req?.body?.mobile,
+        isBlocked: true,
       },
       {
         new: true,
       }
     );
-    res.status(201).json(updatedUser);
-  } catch (error:any) {
+    res.status(201).json({ msg: "User has been blocked successfully" });
+  } catch (error: any) {
     throw new Error(error.message);
   }
 });
 
+export const unBlockUser = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  validateMongoDbId(id);
 
+  try {
+    const unBlocked = await User.findByIdAndUpdate(
+      id,
+      {
+        isBlocked: false,
+      },
+      {
+        new: true,
+      }
+    );
+    res.status(201).json({
+      msg: "User has been unblocked successfully",
+    });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+});
+
+export const handleRefreshToken = asyncHandler(
+  async (req: Request, res: Response) => {
+    const cookie = req.cookies;
+    if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
+    const refreshToken = cookie.refreshToken;
+    const user = await User.findOne({ refreshToken });
+    if (!user)
+      throw new Error(" No Refresh token present in db or not matched");
+    jwt.verify(
+      refreshToken,
+      process.env.JWT_SECRET!,
+      (err: any, decoded: any) => {
+        if (err || user.id !== decoded.id) {
+          throw new Error("There is something wrong with refresh token");
+        }
+        const accessToken = generateToken(user?._id);
+        res.json({ token: accessToken });
+      }
+    );
+  }
+);
