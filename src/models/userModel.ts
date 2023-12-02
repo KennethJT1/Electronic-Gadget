@@ -2,10 +2,6 @@ import { model, Schema, Types, Document, Model } from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
-
-//!mdbgu
-
-
 export interface IUser extends Document {
   firstname: string;
   lastname: string;
@@ -18,10 +14,11 @@ export interface IUser extends Document {
   address: string;
   wishlist: [{}];
   passwordChangedAt: Date;
-  passwordResetToken: String;
-  passwordResetExpires: Date;
+  passwordResetToken: String | undefined;
+  passwordResetExpires: Date | undefined;
 
   isPasswordMatched: (enteredPassword: string) => Promise<boolean>;
+  createPasswordResetToken: () => Promise<any>;
 }
 
 const userSchema = new Schema<IUser>(
