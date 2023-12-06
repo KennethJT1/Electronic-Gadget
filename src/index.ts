@@ -8,6 +8,7 @@ import { dbConnect } from "./config/dbConnect";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
 import User from "./routes/user";
 import Product from "./routes/product";
+import Blog from "./routes/blog";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 app.use("/api/user", User);
 app.use("/api/product", Product);
+app.use("/api/blog", Blog);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
