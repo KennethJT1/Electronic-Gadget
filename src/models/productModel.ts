@@ -1,6 +1,10 @@
-import { model, Schema, Types, Document, Model } from "mongoose";
-import bcrypt from "bcrypt";
-import crypto from "crypto";
+import { model, Schema, Document, Model } from "mongoose";
+
+interface IRating {
+  star: number;
+  postedby: string; // Assuming postedby is the user ID, change the type accordingly
+}
+
 
 export interface IProduct extends Document {
   title: string;
@@ -12,8 +16,9 @@ export interface IProduct extends Document {
   sold: number;
   image: any;
   color: string;
-  ratings: string;
+  ratings: IRating[];
   brand: string;
+  totalrating: number;
 }
 
 const productSchema = new Schema<IProduct>(
@@ -66,6 +71,10 @@ const productSchema = new Schema<IProduct>(
         postedby: { type: Schema.Types.ObjectId, ref: "User" },
       },
     ],
+    totalrating: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

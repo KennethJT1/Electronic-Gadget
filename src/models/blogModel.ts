@@ -1,6 +1,4 @@
-import { model, Schema, Types, Document, Model } from "mongoose";
-import bcrypt from "bcrypt";
-import crypto from "crypto";
+import { model, Schema, Document, Model } from "mongoose";
 
 export interface IBlog extends Document {
   title: string;
@@ -60,7 +58,9 @@ const blogSchema = new Schema<IBlog>(
     },
     images: {
       type: String,
-      default: "https://media.istockphoto.com/id/887987150/photo/blogging-woman-reading-blog.jpg?s=612x612&w=0&k=20&c=7SScR_Y4n7U3k5kBviYm3VwEmW4vmbngDUa0we429GA=" },
+      default:
+        "https://media.istockphoto.com/id/887987150/photo/blogging-woman-reading-blog.jpg?s=612x612&w=0&k=20&c=7SScR_Y4n7U3k5kBviYm3VwEmW4vmbngDUa0we429GA=",
+    },
   },
   {
     toJSON: {

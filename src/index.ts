@@ -1,3 +1,4 @@
+import { updateBrand } from './controllers/brandCtrl';
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
@@ -9,6 +10,9 @@ import { errorHandler, notFound } from "./middlewares/errorHandler";
 import User from "./routes/user";
 import Product from "./routes/product";
 import Blog from "./routes/blog";
+import Category from "./routes/productCategory";
+import BlogCategory from "./routes/blogCategory";
+import Brand from "./routes/brand";
 
 dotenv.config();
 
@@ -25,6 +29,9 @@ app.use(cookieParser());
 app.use("/api/user", User);
 app.use("/api/product", Product);
 app.use("/api/blog", Blog);
+app.use("/api/category", Category);
+app.use("/api/blogcategory", BlogCategory);
+app.use("/api/brand", Brand);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { JwtPayload } from "jsonwebtoken";
 
 import { Blog } from "../models/blogModel";
 import { User } from "../models/userModel";
@@ -10,7 +11,7 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
     const newBlog = await Blog.create(req.body);
     res.json(newBlog);
   } catch (error: any) {
-    throw new Error(error);
+    throw new Error(error.message);
   }
 });
 
@@ -23,7 +24,7 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     });
     res.json(updateBlog);
   } catch (error: any) {
-    throw new Error(error);
+    throw new Error(error.message);
   }
 });
 
@@ -43,126 +44,131 @@ export const getBlog = asyncHandler(async (req: Request, res: Response) => {
     );
     res.json(getBlog);
   } catch (error: any) {
-    throw new Error(error);
+    throw new Error(error.message);
   }
 });
 
-export const getAllBlogs = asyncHandler(async (req, res) => {
+export const getAllBlogs = asyncHandler(async (req: Request, res: Response) => {
   try {
     const getBlogs = await Blog.find();
     res.json(getBlogs);
-  } catch (error:any) {
-    throw new Error(error);
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 });
 
-export const deleteBlog = asyncHandler(async (req, res) => {
+export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
     const deletedBlog = await Blog.findByIdAndDelete(id);
     res.json(deletedBlog);
-  } catch (error:any) {
-    throw new Error(error);
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 });
 
-// const liketheBlog = asyncHandler(async (req, res) => {
-//   const { blogId } = req.body;
-//   validateMongoDbId(blogId);
+export const liketheBlog = asyncHandler(
+  async (req: JwtPayload, res: Response) => {
+    const { blogId } = req.body;
+    validateMongoDbId(blogId);
 
-//   // Find the blog which you want to be liked
-//   const blog = await Blog.findById(blogId);
-//   // find the login user
-//   const loginUserId = req?.user?._id;
-//   // find if the user has liked the blog
-//   const isLiked = blog?.isLiked;
-//   // find if the user has disliked the blog
-//   const alreadyDisliked = blog?.dislikes?.find(
-//     (userId) => userId?.toString() === loginUserId?.toString()
-//   );
-//   if (alreadyDisliked) {
-//     const blog = await Blog.findByIdAndUpdate(
-//       blogId,
-//       {
-//         $pull: { dislikes: loginUserId },
-//         isDisliked: false,
-//       },
-//       { new: true }
-//     );
-//     res.json(blog);
-//   }
-//   if (isLiked) {
-//     const blog = await Blog.findByIdAndUpdate(
-//       blogId,
-//       {
-//         $pull: { likes: loginUserId },
-//         isLiked: false,
-//       },
-//       { new: true }
-//     );
-//     res.json(blog);
-//   } else {
-//     const blog = await Blog.findByIdAndUpdate(
-//       blogId,
-//       {
-//         $push: { likes: loginUserId },
-//         isLiked: true,
-//       },
-//       { new: true }
-//     );
-//     res.json(blog);
-//   }
-// });
+    const blog = await Blog.findById(blogId);
 
-// const disliketheBlog = asyncHandler(async (req, res) => {
-//   const { blogId } = req.body;
-//   validateMongoDbId(blogId);
-//   // Find the blog which you want to be liked
-//   const blog = await Blog.findById(blogId);
-//   // find the login user
-//   const loginUserId = req?.user?._id;
-//   // find if the user has liked the blog
-//   const isDisLiked = blog?.isDisliked;
-//   // find if the user has disliked the blog
-//   const alreadyLiked = blog?.likes?.find(
-//     (userId) => userId?.toString() === loginUserId?.toString()
-//   );
-//   if (alreadyLiked) {
-//     const blog = await Blog.findByIdAndUpdate(
-//       blogId,
-//       {
-//         $pull: { likes: loginUserId },
-//         isLiked: false,
-//       },
-//       { new: true }
-//     );
-//     res.json(blog);
-//   }
-//   if (isDisLiked) {
-//     const blog = await Blog.findByIdAndUpdate(
-//       blogId,
-//       {
-//         $pull: { dislikes: loginUserId },
-//         isDisliked: false,
-//       },
-//       { new: true }
-//     );
-//     res.json(blog);
-//   } else {
-//     const blog = await Blog.findByIdAndUpdate(
-//       blogId,
-//       {
-//         $push: { dislikes: loginUserId },
-//         isDisliked: true,
-//       },
-//       { new: true }
-//     );
-//     res.json(blog);
-//   }
-// });
+    const loginUserId = req?.user?.id;
 
-// const uploadImages = asyncHandler(async (req, res) => {
+    const alreadyDisliked = blog?.dislikes?.find(
+      (userId) => userId?.toString() === loginUserId?.toString()
+    );
+
+    if (alreadyDisliked) {
+      const blog = await Blog.findByIdAndUpdate(
+        blogId,
+        {
+          $pull: { dislikes: loginUserId },
+          isDisliked: false,
+        },
+        { new: true }
+      );
+      res.json(blog);
+    }
+
+    const isLiked = blog?.isLiked;
+    if (isLiked) {
+      const blog = await Blog.findByIdAndUpdate(
+        blogId,
+        {
+          $pull: { likes: loginUserId },
+          isLiked: false,
+        },
+        { new: true }
+      );
+     res.json(blog);
+    } else {
+      const blog = await Blog.findByIdAndUpdate(
+        blogId,
+        {
+          $push: { likes: loginUserId },
+          isLiked: true,
+        },
+        { new: true }
+      );
+      res.json(blog);
+    }
+  }
+);
+
+export const disliketheBlog = asyncHandler(
+  async (req: JwtPayload, res: Response) => {
+    const { blogId } = req.body;
+    validateMongoDbId(blogId);
+
+    const blog = await Blog.findById(blogId);
+
+    const loginUserId = req?.user?.id;
+
+    const alreadyLiked = blog?.likes?.find(
+      (userId) => userId?.toString() === loginUserId?.toString()
+    );
+
+    if (alreadyLiked) {
+      const blog = await Blog.findByIdAndUpdate(
+        blogId,
+        {
+          $pull: { likes: loginUserId },
+          isLiked: false,
+        },
+        { new: true }
+      );
+      res.json(blog);
+    }
+
+    const isDisLiked = blog?.isDisliked;
+    if (isDisLiked) {
+      const blog = await Blog.findByIdAndUpdate(
+        blogId,
+        {
+          $pull: { dislikes: loginUserId },
+          isDisliked: false,
+        },
+        { new: true }
+      );
+      res.json(blog);
+    } else {
+      const blog = await Blog.findByIdAndUpdate(
+        blogId,
+        {
+          $push: { dislikes: loginUserId },
+          isDisliked: true,
+        },
+        { new: true }
+      );
+      res.json(blog);
+    }
+  }
+);
+
+// export const uploadImages = asyncHandler(async (req: Request, res: Response) => {
 //   const { id } = req.params;
 //   validateMongoDbId(id);
 //   try {
