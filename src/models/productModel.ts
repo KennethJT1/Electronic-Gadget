@@ -2,7 +2,7 @@ import { model, Schema, Document, Model } from "mongoose";
 
 interface IRating {
   star: number;
-  postedby: string; // Assuming postedby is the user ID, change the type accordingly
+  postedby: string;
 }
 
 
@@ -14,7 +14,7 @@ export interface IProduct extends Document {
   category: any;
   quantity: number;
   sold: number;
-  image: any;
+  images: [];
   color: string;
   ratings: IRating[];
   brand: string;
@@ -50,9 +50,7 @@ const productSchema = new Schema<IProduct>(
       type: Number,
       required: true,
     },
-    image: {
-      type: Array,
-    },
+    images: [],
     color: {
       type: String,
       required: true,

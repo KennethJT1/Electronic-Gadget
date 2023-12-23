@@ -1,4 +1,3 @@
-import { updateBrand } from './controllers/brandCtrl';
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
@@ -13,6 +12,7 @@ import Blog from "./routes/blog";
 import Category from "./routes/productCategory";
 import BlogCategory from "./routes/blogCategory";
 import Brand from "./routes/brand";
+import Coupon from "./routes/coupon";
 
 dotenv.config();
 
@@ -32,6 +32,7 @@ app.use("/api/blog", Blog);
 app.use("/api/category", Category);
 app.use("/api/blogcategory", BlogCategory);
 app.use("/api/brand", Brand);
+app.use("/api/coupon", Coupon);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");

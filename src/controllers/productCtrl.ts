@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import slugify from "slugify";
-
+import fs from "fs";
 import { Product } from "../models/productModel";
 import { validateMongoDbId } from "../utils/validateMongodbId";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "../models/userModel";
+import { cloudinaryUploadImg } from "../utils/cloudinary";
 
 export const createProduct = asyncHandler(
   async (req: Request, res: Response) => {
@@ -207,3 +208,62 @@ export const rating = asyncHandler(async (req: JwtPayload, res: Response) => {
     throw new Error(error.message);
   }
 });
+
+export const uploadImages = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    validateMongoDbId(id);
+
+    const uploader = (path: any) => cloudinaryUploadImg(path);
+    const urls: any = [];
+
+    const files: any = req.files;
+
+    for (const file of files) {
+      const { path } = file;
+      try {
+        const newPath: any = await uploader(path);
+        urls.push(newPath);
+        fs.unlinkSync(path);
+      } catch (uploadError: any) {
+        if (uploadError.message === "File not found") {
+          res.status(400).json({ status: "fail", message: "File not found" });
+        } else if (
+          uploadError.message ===
+          "Cloudinary upload response is not as expected"
+        ) {
+          res.status(500).json({
+            status: "error",
+            message: "Unexpected Cloudinary response",
+          });
+        } else {
+          res
+            .status(500)
+            .json({ status: "error", message: "Internal Server Error" });
+        }
+      }
+    }
+
+    const findProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        images: urls.map((file: any) => {
+          return file;
+        }),
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!findProduct) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Product not found" });
+    }
+
+    res.json(findProduct);
+  } catch (error: any) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};

@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
-
+import fs from "fs"
 import { Blog } from "../models/blogModel";
 import { User } from "../models/userModel";
 import { validateMongoDbId } from "../utils/validateMongodbId";
 import asyncHandler from "express-async-handler";
+import { cloudinaryUploadImg } from "../utils/cloudinary";
 
 export const createBlog = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -103,7 +104,7 @@ export const liketheBlog = asyncHandler(
         },
         { new: true }
       );
-     res.json(blog);
+      res.json(blog);
     } else {
       const blog = await Blog.findByIdAndUpdate(
         blogId,
@@ -168,33 +169,61 @@ export const disliketheBlog = asyncHandler(
   }
 );
 
-// export const uploadImages = asyncHandler(async (req: Request, res: Response) => {
-//   const { id } = req.params;
-//   validateMongoDbId(id);
-//   try {
-//     const uploader = (path) => cloudinaryUploadImg(path, "images");
-//     const urls = [];
-//     const files = req.files;
-//     for (const file of files) {
-//       const { path } = file;
-//       const newpath = await uploader(path);
-//       console.log(newpath);
-//       urls.push(newpath);
-//       fs.unlinkSync(path);
-//     }
-//     const findBlog = await Blog.findByIdAndUpdate(
-//       id,
-//       {
-//         images: urls.map((file) => {
-//           return file;
-//         }),
-//       },
-//       {
-//         new: true,
-//       }
-//     );
-//     res.json(findBlog);
-//   } catch (error) {
-//     throw new Error(error);
-//   }
-// });
+export const uploadImages = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    validateMongoDbId(id);
+
+    const uploader = (path: any) => cloudinaryUploadImg(path);
+    const urls: any = [];
+
+    const files: any = req.files;
+
+    for (const file of files) {
+      const { path } = file;
+      try {
+        const newPath: any = await uploader(path);
+        urls.push(newPath);
+        fs.unlinkSync(path);
+      } catch (uploadError: any) {
+        if (uploadError.message === "File not found") {
+          res.status(400).json({ status: "fail", message: "File not found" });
+        } else if (
+          uploadError.message ===
+          "Cloudinary upload response is not as expected"
+        ) {
+          res.status(500).json({
+            status: "error",
+            message: "Unexpected Cloudinary response",
+          });
+        } else {
+          res
+            .status(500)
+            .json({ status: "error", message: "Internal Server Error" });
+        }
+      }
+    }
+
+    const findBlog = await Blog.findByIdAndUpdate(
+      id,
+      {
+        images: urls.map((file: any) => {
+          return file;
+        }),
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!findBlog) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Product not found" });
+    }
+
+    res.json(findBlog);
+  } catch (error: any) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
