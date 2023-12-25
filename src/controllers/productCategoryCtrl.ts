@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { ProductCategory } from "../models/productCategoryModel";
 import { validateMongoDbId } from "../utils/validateMongodbId";
 import asyncHandler from "express-async-handler";
-import { JwtPayload } from "jsonwebtoken";
 
 export const createCategory = asyncHandler(
   async (req: Request, res: Response) => {

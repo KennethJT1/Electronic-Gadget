@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const multerFilter = (req:any, file:any, cb:any) => {
+const multerFilter = (req: any, file: any, cb: any) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
   } else {
@@ -27,10 +27,10 @@ export const uploadPhoto = multer({
   limits: { fileSize: 2000000 },
 });
 
-export const productImgResize = async (req:any, res:any, next:any) => {
+export const productImgResize = async (req: any, res: any, next: any) => {
   if (!req.files) return next();
   await Promise.all(
-    req.files.map(async (file:any) => {
+    req.files.map(async (file: any) => {
       await sharp(file.path)
         .resize(300, 300)
         .toFormat("jpeg")
@@ -42,10 +42,10 @@ export const productImgResize = async (req:any, res:any, next:any) => {
   next();
 };
 
-export const blogImgResize = async (req:any, res:any, next:any) => {
+export const blogImgResize = async (req: any, res: any, next: any) => {
   if (!req.files) return next();
   await Promise.all(
-    req.files.map(async (file:any) => {
+    req.files.map(async (file: any) => {
       await sharp(file.path)
         .resize(300, 300)
         .toFormat("jpeg")

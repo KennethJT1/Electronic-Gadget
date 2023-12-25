@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import fs from "fs"
 import { Blog } from "../models/blogModel";
-import { User } from "../models/userModel";
 import { validateMongoDbId } from "../utils/validateMongodbId";
 import asyncHandler from "express-async-handler";
 import { cloudinaryUploadImg } from "../utils/cloudinary";
