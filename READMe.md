@@ -1,2 +1,2 @@
 
-Run "yarn build to convrt to JS"
+Run "yarn build to convert to JS"
