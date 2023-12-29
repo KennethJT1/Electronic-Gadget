@@ -400,8 +400,8 @@ export const emptyCart = asyncHandler(
     const { id } = req.user;
     validateMongoDbId(id);
     try {
-      const user = await User.findOne({ id });
-      const cart = await Cart.findOneAndRemove({ orderby: user!._id });
+      const user = await User.findOne({ _id: id });
+      const cart = await Cart.findOneAndDelete({ orderedBy: user!._id });
       res.json(cart);
     } catch (error: any) {
       throw new Error(error.message);
